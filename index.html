@@ -67,7 +67,7 @@ input:disabled,input[readonly]{background:var(--gray-100)}
 .btn-secondary:hover{background:var(--gray-50)}
 .btn-success{background:var(--green);color:#fff}
 .btn-danger{background:var(--red);color:#fff}
-.btn-sm{padding:5px 12px;font-size:12px}
+.btn-sm{padding:0 14px;font-size:13px;height:36px;box-sizing:border-box}
 .btn-full{width:100%;justify-content:center;padding:11px}
 .btn:disabled{opacity:.6;cursor:not-allowed}
 .card{background:#fff;border-radius:10px;border:1px solid var(--gray-200);padding:20px}
@@ -104,9 +104,9 @@ tr:hover td{background:var(--gray-50)}
 .modal-close{background:none;border:none;cursor:pointer;color:var(--gray-400);padding:4px;line-height:1}
 .modal-close:hover{color:var(--gray-700)}
 .toolbar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:nowrap;width:100%;overflow:visible}
-.srch{display:flex;align-items:center;background:#fff;border:1.5px solid var(--gray-200);border-radius:8px;padding:6px 12px;gap:8px;flex:1 1 auto;min-width:160px;max-width:280px}
-.srch input{border:none;background:none;outline:none;font-size:13px;width:100%}
-.fsel{padding:7px 8px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:12px;background:#fff;cursor:pointer;appearance:auto;-webkit-appearance:auto;color:var(--gray-700);min-width:0;max-width:160px}
+.srch{display:flex;align-items:center;background:#fff;border:1.5px solid var(--gray-200);border-radius:8px;padding:0 12px;gap:8px;flex:1 1 auto;min-width:160px;max-width:280px;height:36px;box-sizing:border-box}
+.srch input{border:none;background:none;outline:none;font-size:13px;width:100%;line-height:36px;height:100%}
+.fsel{height:36px;padding:0 8px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;background:#fff;cursor:pointer;appearance:auto;-webkit-appearance:auto;color:var(--gray-700);min-width:0;max-width:160px;box-sizing:border-box}
 .pager{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
 .pager-info{font-size:12px;color:var(--gray-500)}
 .pager-btns{display:flex;gap:4px}
@@ -1017,10 +1017,10 @@ let usersData = [];
 function usersHTML() {
   return `<div class="toolbar">
     <div class="srch">${ICONS.search}<input id="uf-search" placeholder="Search users..."></div>
-    <select class="fsel" id="uf-type"><option value="">All Types</option><option>Service Coordinator</option><option>Service Technician</option><option>Branch User</option><option>Head Office Team</option></select>
+    <select class="fsel" id="uf-type"><option value="">Types</option><option>Service Coordinator</option><option>Service Technician</option><option>Branch User</option><option>Head Office Team</option></select>
     <select class="fsel" id="uf-status"><option value="">Status</option><option>Pending</option><option>Approved</option><option>Rejected</option></select>
     <select class="fsel" id="uf-branch">
-      <option value="">All Branches</option>
+      <option value="">Branches</option>
       <option>Abuja</option>
       <option>PHC</option>
       <option>Onitsha</option>
