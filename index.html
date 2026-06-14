@@ -1239,8 +1239,8 @@ function productsHTML() {
   </div>
   <div class="toolbar">
     <div class="srch">${ICONS.search}<input id="pr-search" placeholder="Search products..."></div>
-    <select class="fsel" id="pr-brand"><option value="">All Brands</option></select>
-    <select class="fsel" id="pr-cat"><option value="">All Categories</option>${Object.entries(CAT_NAMES).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select>
+    <select class="fsel" id="pr-brand"><option value="">Brands</option></select>
+    <select class="fsel" id="pr-cat"><option value="">Categories</option>${Object.entries(CAT_NAMES).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select>
     ${isHO ? `<button class="btn btn-primary btn-sm" id="add-product-btn">+ Add Product</button>` : ""}
   </div>
   <div class="card" style="padding:0">
