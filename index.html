@@ -331,6 +331,18 @@ async function demoCall(method, path, body) {
     return { token: "demo", user: u };
   }
   if (base === "/auth/register") return { message: "Demo: registration submitted" };
+  if (base === "/products" && method === "GET") return window.__customProds || [];
+  if (base === "/products" && method === "POST") {
+    const prod = { _id: "cp" + Date.now(), ...body, addedByName: S.user.fullName, createdAt: new Date() };
+    window.__customProds = window.__customProds || [];
+    window.__customProds.unshift(prod);
+    return prod;
+  }
+  if (method === "DELETE" && base.startsWith("/products/")) {
+    const id = base.split("/").pop();
+    window.__customProds = (window.__customProds || []).filter(p => p._id !== id);
+    return { message: "Deleted" };
+  }
   if (base === "/services/stats/dashboard") return { total:142, opened:38, pending:21, closed:83, monthlyTrend:[{_id:{year:2025,month:11},count:18},{_id:{year:2025,month:12},count:22},{_id:{year:2026,month:1},count:27},{_id:{year:2026,month:2},count:19},{_id:{year:2026,month:3},count:31},{_id:{year:2026,month:4},count:25}] };
   if (base === "/services" && method === "GET") {
     let all = _dRecs();
@@ -398,6 +410,7 @@ const ICONS = {
   users:icon('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'),
   clock:icon('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'),
   out:  `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`,
+  box:  icon('<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>'),
   search:`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
   x:    `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`
 };
@@ -589,9 +602,10 @@ function appHTML() {
     ["services", ICONS.doc, "Service Records", true],
     ["create", ICONS.plus, "Create Service", isCoord],
     ["users", ICONS.users, "User Management", isHO],
-    ["pending", ICONS.clock, "Pending Approvals", isHO]
+    ["pending", ICONS.clock, "Pending Approvals", isHO],
+    ["products", ICONS.box, "Products", isHO]
   ];
-  const titles = { dashboard:"Dashboard", services:"Service Records", create:"Create Service Record", users:"User Management", pending:"Pending Approvals" };
+  const titles = { dashboard:"Dashboard", services:"Service Records", create:"Create Service Record", users:"User Management", pending:"Pending Approvals", products:"Products" };
   return `<div class="app">
     <div class="sidebar" id="sidebar">
       <div class="s-logo"><img src="${LOGO}" alt="Somotex"><div><div class="s-logo-t">Somotex</div><div class="s-logo-s">Service Manager</div></div></div>
@@ -662,6 +676,7 @@ function pageHTML() {
     case "create":    return createHTML();
     case "users":     return usersHTML();
     case "pending":   return pendingHTML();
+    case "products":  return productsHTML();
     default: return dashHTML();
   }
 }
@@ -672,6 +687,7 @@ function bindPage() {
     case "create":    bindCreate(); break;
     case "users":     bindUsers(); break;
     case "pending":   bindPending(); break;
+    case "products":  bindProducts(); break;
   }
 }
 
@@ -906,6 +922,28 @@ function createHTML() {
         <div class="fg"><label>Orion Code</label><input id="c-code" readonly placeholder="Auto-filled"></div>
         <div class="fg"><label>Sub-Category</label><input id="c-sub" readonly placeholder="Auto-filled"></div>
       </div>
+      <div id="manual-entry" style="display:none;background:var(--blue-bg);border:1.5px solid #93c5fd;border-radius:10px;padding:16px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:12px">📝 Add Manually — Product not in system</div>
+        <div class="frow">
+          <div class="fg mb0"><label class="req">Brand</label><input id="m-brand" placeholder="e.g. SAMSUNG"></div>
+          <div class="fg mb0"><label class="req">Category</label>
+            <select id="m-cat">
+              <option value="">Select...</option>
+              ${Object.entries(CAT_NAMES).map(([k,v])=>`<option value="${k}">${v} (${k})</option>`).join("")}
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="frow" style="margin-top:10px">
+          <div class="fg mb0"><label>Orion Code</label><input id="m-code" placeholder="e.g. 4897040179812"></div>
+          <div class="fg mb0"><label>Sub-Category</label><input id="m-sub" placeholder="e.g. INVERTER SPLIT AC"></div>
+        </div>
+        <div class="fg" style="margin-top:10px"><label class="req">Orion Description</label><input id="m-desc" placeholder="e.g. BAS-09RCEW - R410"></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn btn-primary btn-sm" id="m-confirm-btn">✓ Use this product</button>
+          <button class="btn btn-secondary btn-sm" id="m-cancel-btn">Cancel</button>
+        </div>
+      </div>
       <div class="fg"><label class="req">Service Technician</label>
         <div class="ac-wrap"><input id="c-tech" placeholder="Search or type technician name..." autocomplete="off"><div id="c-tech-dd" class="ac-dd"></div></div>
         <input type="hidden" id="c-tech-id">
@@ -943,16 +981,37 @@ async function bindCreate() {
         .map(c=>`<div class="ac-item" data-val="${c}">${CAT_NAMES[c]||c}<small>${c}</small></div>`).join(""),
     (el) => { CF2.category = el.dataset.val; qs("#c-cat").value = CAT_NAMES[el.dataset.val]||el.dataset.val; }
   );
-  // Orion autocomplete
+  // Orion autocomplete — merges pre-loaded PRODUCT_DATA + custom DB products
+  let customProds = [];
+  try {
+    if (S.api === "DEMO") { customProds = window.__customProds || []; }
+    else { customProds = await call("GET", "/products"); }
+  } catch {}
+
   setupAC("c-orion", "c-orion-dd",
     val => {
+      // Pre-loaded products
       let prods = PRODUCT_DATA;
-      if (CF2.brand) prods = prods.filter(p=>p.BRAND===CF2.brand);
+      if (CF2.brand)    prods = prods.filter(p=>p.BRAND===CF2.brand);
       if (CF2.category) prods = prods.filter(p=>p.CATEGORY===CF2.category);
-      return prods.filter(p=>p.ORION_DESCRIPTION.toLowerCase().includes(val.toLowerCase())).slice(0,10)
-        .map(p=>`<div class="ac-item" data-desc="${p.ORION_DESCRIPTION}" data-code="${p.ORION_CODE}" data-sub="${p.SUB_CATEGORY}" data-cat="${p.CATEGORY}" data-brand="${p.BRAND}">${p.ORION_DESCRIPTION}<small>${p.BRAND} · ${CAT_NAMES[p.CATEGORY]||p.CATEGORY} · ${p.SUB_CATEGORY} · ${p.ORION_CODE}</small></div>`).join("");
+      const preloaded = prods.filter(p=>p.ORION_DESCRIPTION.toLowerCase().includes(val.toLowerCase())).slice(0,8)
+        .map(p=>`<div class="ac-item" data-desc="${p.ORION_DESCRIPTION}" data-code="${p.ORION_CODE}" data-sub="${p.SUB_CATEGORY}" data-cat="${p.CATEGORY}" data-brand="${p.BRAND}">${p.ORION_DESCRIPTION}<small>${p.BRAND} · ${CAT_NAMES[p.CATEGORY]||p.CATEGORY} · ${p.SUB_CATEGORY} · ${p.ORION_CODE}</small></div>`);
+      // Custom DB products
+      let cprods = customProds;
+      if (CF2.brand)    cprods = cprods.filter(p=>p.brand===CF2.brand);
+      if (CF2.category) cprods = cprods.filter(p=>p.category===CF2.category);
+      const custom = cprods.filter(p=>p.orionDescription.toLowerCase().includes(val.toLowerCase())).slice(0,5)
+        .map(p=>`<div class="ac-item" data-desc="${p.orionDescription}" data-code="${p.orionCode||""}" data-sub="${p.subCategory||""}" data-cat="${p.category}" data-brand="${p.brand}">${p.orionDescription}<small style="color:var(--blue)">${p.brand} · ${CAT_NAMES[p.category]||p.category} · ★ Custom Product</small></div>`);
+      // Add Manually option at bottom
+      const addManually = `<div class="ac-item" data-manual="1" style="color:var(--blue);font-weight:600;border-top:1px solid var(--gray-200)">+ Add Manually — enter product details</div>`;
+      return [...preloaded, ...custom, addManually].join("");
     },
     (el) => {
+      if (el.dataset.manual) {
+        // Show manual entry fields
+        showManualEntry();
+        return;
+      }
       CF2.orionDescription = el.dataset.desc;
       CF2.orionCode = el.dataset.code;
       CF2.subCategory = el.dataset.sub;
@@ -963,6 +1022,9 @@ async function bindCreate() {
       qs("#c-sub").value = el.dataset.sub;
       qs("#c-cat").value = CAT_NAMES[el.dataset.cat]||el.dataset.cat;
       qs("#c-brand").value = el.dataset.brand;
+      // Hide manual entry if visible
+      const me = qs("#manual-entry");
+      if (me) me.style.display = "none";
     }
   );
   // Tech autocomplete
@@ -976,6 +1038,45 @@ async function bindCreate() {
     (el) => { CF2.techId = el.dataset.id; CF2.techName = el.dataset.name; qs("#c-tech").value = el.dataset.name; qs("#c-tech-id").value = el.dataset.id; }
   );
   on(qs("#cr-btn"), "click", submitCreate);
+}
+
+function showManualEntry() {
+  const me = qs("#manual-entry");
+  if (me) {
+    me.style.display = "block";
+    // Clear orion search field
+    const co = qs("#c-orion");
+    if (co) co.value = "";
+    // Clear previously selected orion data
+    CF2.orionDescription = ""; CF2.orionCode = ""; CF2.subCategory = ""; CF2.category = ""; CF2.brand = "";
+    if (qs("#c-brand")) qs("#c-brand").value = "";
+    if (qs("#c-cat"))   qs("#c-cat").value = "";
+    if (qs("#c-code"))  qs("#c-code").value = "";
+    if (qs("#c-sub"))   qs("#c-sub").value = "";
+    // Bind confirm + cancel
+    on(qs("#m-confirm-btn"), "click", () => {
+      const brand = (qs("#m-brand")||{}).value?.trim();
+      const cat   = (qs("#m-cat")||{}).value;
+      const code  = (qs("#m-code")||{}).value?.trim();
+      const sub   = (qs("#m-sub")||{}).value?.trim();
+      const desc  = (qs("#m-desc")||{}).value?.trim();
+      if (!brand || !cat || !desc) {
+        alert("Brand, Category and Orion Description are required for manual entry.");
+        return;
+      }
+      // Store in CF2 for complaint submission
+      CF2.brand = brand; CF2.category = cat; CF2.orionCode = code;
+      CF2.orionDescription = desc; CF2.subCategory = sub;
+      // Reflect in visible fields
+      if (qs("#c-brand")) qs("#c-brand").value = brand;
+      if (qs("#c-cat"))   qs("#c-cat").value = CAT_NAMES[cat] || cat;
+      if (qs("#c-orion")) qs("#c-orion").value = desc;
+      if (qs("#c-code"))  qs("#c-code").value = code;
+      if (qs("#c-sub"))   qs("#c-sub").value = sub;
+      me.style.display = "none";
+    });
+    on(qs("#m-cancel-btn"), "click", () => { me.style.display = "none"; });
+  }
 }
 function setupAC(inputId, ddId, getItems, onSelect) {
   const inp = qs("#" + inputId);
@@ -1124,6 +1225,133 @@ async function rejectUser(id, reload) {
   if (!confirm("Reject this registration?")) return;
   try { await call("PATCH", "/users/"+id+"/reject", { reason:"Rejected by administrator" }); reload(); }
   catch(e) { alert(e.message); }
+}
+
+// ── Products Page ────────────────────────────────────────────────────────
+let productsData = [];
+
+function productsHTML() {
+  const isAdmin = S.user.userType === "System Administrator";
+  const isHO    = ["Head Office Team","System Administrator"].includes(S.user.userType);
+  return `<div class="section-header">
+    <div class="sec-title">Products</div>
+    <div class="sec-sub">Manage custom products added by Head Office</div>
+  </div>
+  <div class="toolbar">
+    <div class="srch">${ICONS.search}<input id="pr-search" placeholder="Search products..."></div>
+    <select class="fsel" id="pr-brand"><option value="">All Brands</option></select>
+    <select class="fsel" id="pr-cat"><option value="">All Categories</option>${Object.entries(CAT_NAMES).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select>
+    ${isHO ? `<button class="btn btn-primary btn-sm" id="add-product-btn">+ Add Product</button>` : ""}
+  </div>
+  <div class="card" style="padding:0">
+    <div id="products-tbl" style="padding:20px"><div class="ld"><span class="spin"></span> Loading...</div></div>
+  </div>
+  <div id="products-modal"></div>`;
+}
+
+async function bindProducts() {
+  await loadProducts();
+  on(qs("#pr-search"), "input", debounce(e => loadProducts({ search: e.target.value }), 300));
+  on(qs("#pr-brand"),  "change", e => loadProducts({ brand: e.target.value }));
+  on(qs("#pr-cat"),    "change", e => loadProducts({ category: e.target.value }));
+  on(qs("#add-product-btn"), "click", openAddProduct);
+}
+
+async function loadProducts(extra = {}) {
+  const el = qs("#products-tbl"); if (!el) return;
+  el.innerHTML = `<div class="ld"><span class="spin"></span> Loading...</div>`;
+  try {
+    const isAdmin = S.user.userType === "System Administrator";
+    let products = [];
+    if (S.api === "DEMO") {
+      products = window.__customProds || [];
+    } else {
+      const p = new URLSearchParams();
+      Object.entries(extra).forEach(([k,v]) => { if (v) p.set(k, v); });
+      products = await call("GET", "/products?" + p);
+    }
+    productsData = products;
+    const brandSel = qs("#pr-brand");
+    if (brandSel) {
+      const brands = [...new Set(products.map(p => p.brand))].sort();
+      brandSel.innerHTML = `<option value="">All Brands</option>` + brands.map(b => `<option>${b}</option>`).join("");
+    }
+    if (!products.length) {
+      el.innerHTML = `<div class="empty"><p>No custom products added yet.</p><p class="sm muted mt1">Use the + Add Product button to add new products.</p></div>`;
+      return;
+    }
+    el.innerHTML = `<div class="tbl-wrap"><table>
+      <thead><tr><th>Brand</th><th>Category</th><th>Orion Code</th><th>Orion Description</th><th>Sub-Category</th><th>Added By</th><th>Date</th>${isAdmin ? "<th>Actions</th>" : ""}</tr></thead>
+      <tbody>${products.map(p => `<tr>
+        <td class="bold">${p.brand}</td>
+        <td>${CAT_NAMES[p.category] || p.category}</td>
+        <td>${p.orionCode || "—"}</td>
+        <td>${p.orionDescription}</td>
+        <td>${p.subCategory || "—"}</td>
+        <td>${p.addedByName || "—"}</td>
+        <td>${fmtDate(p.createdAt)}</td>
+        ${isAdmin ? `<td><button class="btn btn-danger btn-sm" data-del="${p._id}">Delete</button></td>` : ""}
+      </tr>`).join("")}
+      </tbody>
+    </table></div>`;
+    if (isAdmin) {
+      qsa("[data-del]", el).forEach(b => on(b, "click", () => deleteProduct(b.dataset.del)));
+    }
+  } catch(e) { el.innerHTML = alert_html(e.message, "error"); }
+}
+
+function openAddProduct() {
+  showModal(`<div class="modal-hdr"><div class="modal-title">Add New Product</div><button class="modal-close" id="mc">${ICONS.x}</button></div>
+    <div class="modal-body">
+      <div id="ap-alert"></div>
+      <div class="frow">
+        <div class="fg"><label class="req">Brand</label><input id="ap-brand" placeholder="e.g. SAMSUNG"></div>
+        <div class="fg"><label class="req">Category</label>
+          <select id="ap-cat">
+            <option value="">Select category...</option>
+            ${Object.entries(CAT_NAMES).map(([k,v]) => `<option value="${k}">${v} (${k})</option>`).join("")}
+            <option value="OTHER">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Orion Code</label><input id="ap-code" placeholder="e.g. 4897040179812"></div>
+        <div class="fg"><label>Sub-Category</label><input id="ap-sub" placeholder="e.g. INVERTER SPLIT AC"></div>
+      </div>
+      <div class="fg"><label class="req">Orion Description</label><input id="ap-desc" placeholder="e.g. BAS-09RCEW - R410"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" id="mc2">Cancel</button>
+      <button class="btn btn-primary" id="ap-save-btn">Save Product</button>
+    </div>`);
+  on(qs("#ap-save-btn"), "click", async () => {
+    const brand = (qs("#ap-brand")||{}).value?.trim();
+    const cat   = (qs("#ap-cat")||{}).value;
+    const code  = (qs("#ap-code")||{}).value?.trim();
+    const sub   = (qs("#ap-sub")||{}).value?.trim();
+    const desc  = (qs("#ap-desc")||{}).value?.trim();
+    if (!brand || !cat || !desc) { qs("#ap-alert").innerHTML = alert_html("Brand, Category and Orion Description are required.", "error"); return; }
+    try {
+      const btn = qs("#ap-save-btn"); btn.disabled = true; btn.innerHTML = `<span class="spin"></span> Saving...`;
+      if (S.api === "DEMO") {
+        const prod = { _id: "cp" + Date.now(), brand, category: cat, orionCode: code, orionDescription: desc, subCategory: sub, addedByName: S.user.fullName, createdAt: new Date() };
+        window.__customProds = window.__customProds || [];
+        window.__customProds.unshift(prod);
+      } else {
+        await call("POST", "/products", { brand, category: cat, orionCode: code, orionDescription: desc, subCategory: sub });
+      }
+      closeModal(); loadProducts();
+    } catch(e) { qs("#ap-alert").innerHTML = alert_html(e.message, "error"); qs("#ap-save-btn").disabled = false; qs("#ap-save-btn").innerHTML = "Save Product"; }
+  });
+}
+
+async function deleteProduct(id) {
+  if (!confirm("Delete this product? This cannot be undone.")) return;
+  try {
+    if (S.api === "DEMO") { window.__customProds = (window.__customProds || []).filter(p => p._id !== id); }
+    else { await call("DELETE", "/products/" + id); }
+    loadProducts();
+  } catch(e) { alert(e.message); }
 }
 
 // ── Modal helper ─────────────────────────────────────────
