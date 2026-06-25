@@ -984,7 +984,19 @@ let CF2 = { brand:"", category:"", orionDescription:"", orionCode:"", subCategor
 let techs = [];
 
 function createHTML() {
-  return `<div style="max-width:800px">
+  return `<div id="create-form" style="max-width:800px">
+    <style>
+      #create-form .card{padding:14px 16px}
+      #create-form .card-hdr{margin-bottom:10px}
+      #create-form .fg{margin-bottom:10px}
+      #create-form .frow{gap:10px}
+      #create-form label{margin-bottom:3px}
+      #create-form input,#create-form select,#create-form textarea{padding:6px 10px;font-size:13px}
+      #create-form textarea{min-height:0}
+      #create-form .sm.muted.mt1{margin-top:2px}
+      #create-form .divider{margin:8px 0}
+      #create-form #cr-alert:empty{display:none}
+    </style>
     <div id="cr-alert"></div>
     <div class="card">
       <div class="card-hdr"><div class="card-title">New Service Record</div></div>
@@ -1037,8 +1049,8 @@ function createHTML() {
       <div class="fg"><label>Remarks</label><textarea id="c-rem" rows="3" placeholder="Service observations, findings, notes..."></textarea></div>
     </div>
 
-    <div class="card" style="margin-top:16px;padding:0;overflow:hidden">
-      <button id="addinfo-toggle" onclick="(function(){var b=document.getElementById('addinfo-toggle'),p=document.getElementById('addinfo-body'),ic=document.getElementById('addinfo-chevron'),open=b.getAttribute('data-open')=='1';if(open){p.style.maxHeight='0';p.style.opacity='0';ic.style.transform='rotate(0deg)';b.setAttribute('data-open','0');}else{p.style.maxHeight='900px';p.style.opacity='1';ic.style.transform='rotate(180deg)';b.setAttribute('data-open','1');}})()" data-open="0" style="width:100%;background:none;border:none;cursor:pointer;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;text-align:left;border-radius:10px">
+    <div class="card" style="margin-top:8px;padding:0;overflow:hidden">
+      <button id="addinfo-toggle" onclick="(function(){var b=document.getElementById('addinfo-toggle'),p=document.getElementById('addinfo-body'),ic=document.getElementById('addinfo-chevron'),open=b.getAttribute('data-open')=='1';if(open){p.style.maxHeight='0';p.style.opacity='0';ic.style.transform='rotate(0deg)';b.setAttribute('data-open','0');}else{p.style.maxHeight='900px';p.style.opacity='1';ic.style.transform='rotate(180deg)';b.setAttribute('data-open','1');}})()" data-open="0" style="width:100%;background:none;border:none;cursor:pointer;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;text-align:left;border-radius:10px">
         <div>
           <div style="font-size:15px;font-weight:700;color:var(--gray-800)">Additional Information <span style="font-size:12px;font-weight:400;color:var(--gray-400)">(Optional)</span></div>
           <div style="font-size:12px;color:var(--gray-500);margin-top:2px">Customer, Dealer &amp; Product details — all fields are optional</div>
@@ -1075,7 +1087,7 @@ function createHTML() {
       </div>
     </div>
 
-    <div class="flex gap2 jend mt2">
+    <div class="flex gap2 jend" style="margin-top:8px">
       <button class="btn btn-secondary" onclick="go('services')">Cancel</button>
       <button class="btn btn-primary" id="cr-btn">Create Service Record</button>
     </div>
