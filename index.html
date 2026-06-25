@@ -869,6 +869,21 @@ function openView(id) {
       </div>
       ${r.remarks?`<div class="fg"><label>Remarks</label><div style="background:var(--gray-50);padding:10px;border-radius:8px;font-size:13px">${r.remarks}</div></div>`:""}
       ${(r.statusHistory||[]).length?`<div class="divider"></div><div style="font-size:13px;font-weight:700;margin-bottom:10px">Status History</div>${r.statusHistory.map(h=>`<div class="hist-item"><div class="hist-dot"></div><div><div class="hist-title">${h.previousStatus||"Created"} → ${h.newStatus}</div><div class="hist-meta">${h.changedByName||"—"} · ${new Date(h.changedAt).toLocaleString()}</div>${h.remarks?`<div class="sm muted">${h.remarks}</div>`:""}</div></div>`).join("")}`:""}
+      ${(()=>{
+        const c=r.customer||{}, d=r.dealer||{}, p=r.productInfo||{};
+        const fmtD=v=>v?new Date(v).toLocaleDateString():"—";
+        const fv=v=>v||"—";
+        const hasC=c.name||c.address||c.phone||c.dateOfPurchase;
+        const hasD=d.name||d.address||d.phone||d.dateOfPurchase;
+        const hasP=p.location||p.serialNo;
+        if(!hasC&&!hasD&&!hasP) return "";
+        const lbl=(t,v)=>`<div><div style="font-size:11px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">${t}</div><div style="font-size:13px;font-weight:600">${v}</div></div>`;
+        let html=`<div class="divider"></div><div style="font-size:13px;font-weight:700;margin-bottom:12px">Additional Information</div>`;
+        if(hasC){html+=`<div style="font-size:12px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Customer Information</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">${lbl("Date of Purchase",fmtD(c.dateOfPurchase))}${lbl("Customer Name",fv(c.name))}${lbl("Address",fv(c.address))}${lbl("Phone No.",fv(c.phone))}</div>`;}
+        if(hasD){html+=`<div style="font-size:12px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Dealer Information</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">${lbl("Date of Purchase",fmtD(d.dateOfPurchase))}${lbl("Dealer Name",fv(d.name))}${lbl("Address",fv(d.address))}${lbl("Phone No.",fv(d.phone))}</div>`;}
+        if(hasP){html+=`<div style="font-size:12px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Product Information</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">${lbl("Location",fv(p.location))}${lbl("Serial No.",fv(p.serialNo))}</div>`;}
+        return html;
+      })()}
       ${techHist.length?`<div class="divider"></div><div style="font-size:13px;font-weight:700;margin-bottom:10px">Technician Assignment History</div>${techHist.map(h=>`<div class="hist-item"><div class="hist-dot"></div><div><div class="hist-title">${h.previousTechnicianName||"(none)"} → ${h.newTechnicianName}</div><div class="hist-meta">${h.changedByName||"—"} · ${new Date(h.changedAt).toLocaleString()}</div></div></div>`).join("")}`:""}
     </div>`);
 }
@@ -1020,6 +1035,39 @@ function createHTML() {
         <div class="sm muted mt1">Select registered technician or type manually.</div>
       </div>
       <div class="fg"><label>Remarks</label><textarea id="c-rem" rows="3" placeholder="Service observations, findings, notes..."></textarea></div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="card-hdr">
+        <div>
+          <div class="card-title">Additional Information <span style="font-size:12px;font-weight:400;color:var(--gray-400)">(Optional)</span></div>
+          <div class="card-sub">Customer, Dealer &amp; Product details — all fields are optional</div>
+        </div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Customer Information</div>
+      <div class="frow">
+        <div class="fg"><label>Date of Purchase</label><input type="date" id="c-cust-dop"></div>
+        <div class="fg"><label>Customer Name</label><input id="c-cust-name" placeholder="e.g. John Doe"></div>
+      </div>
+      <div class="fg"><label>Customer Address</label><textarea id="c-cust-addr" rows="2" placeholder="Full address..."></textarea></div>
+      <div class="fg"><label>Customer Phone No.</label><input id="c-cust-phone" type="tel" placeholder="e.g. +2348012345678"></div>
+
+      <div class="divider"></div>
+      <div style="font-size:13px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Dealer Information</div>
+      <div class="frow">
+        <div class="fg"><label>Date of Purchase</label><input type="date" id="c-dlr-dop"></div>
+        <div class="fg"><label>Dealer Name</label><input id="c-dlr-name" placeholder="e.g. ABC Electronics"></div>
+      </div>
+      <div class="fg"><label>Dealer Address</label><textarea id="c-dlr-addr" rows="2" placeholder="Full address..."></textarea></div>
+      <div class="fg"><label>Dealer Phone No.</label><input id="c-dlr-phone" type="tel" placeholder="e.g. +2348012345678"></div>
+
+      <div class="divider"></div>
+      <div style="font-size:13px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Product Information</div>
+      <div class="frow">
+        <div class="fg"><label>Location</label><input id="c-prod-loc" placeholder="e.g. Living Room"></div>
+        <div class="fg"><label>Product Serial No.</label><input id="c-prod-serial" placeholder="e.g. SN-20240001"></div>
+      </div>
+
       <div class="flex gap2 jend mt2">
         <button class="btn btn-secondary" onclick="go('services')">Cancel</button>
         <button class="btn btn-primary" id="cr-btn">Create Service Record</button>
@@ -1174,9 +1222,33 @@ async function submitCreate() {
     qs("#cr-alert").innerHTML = alert_html("Please fill: Date, Brand, Orion Description, and Technician.","error");
     return;
   }
+  // Collect optional additional information
+  const custDop   = (qs("#c-cust-dop")  ||{}).value;
+  const custName  = (qs("#c-cust-name") ||{}).value?.trim();
+  const custAddr  = (qs("#c-cust-addr") ||{}).value?.trim();
+  const custPhone = (qs("#c-cust-phone")||{}).value?.trim();
+  const dlrDop    = (qs("#c-dlr-dop")   ||{}).value;
+  const dlrName   = (qs("#c-dlr-name")  ||{}).value?.trim();
+  const dlrAddr   = (qs("#c-dlr-addr")  ||{}).value?.trim();
+  const dlrPhone  = (qs("#c-dlr-phone") ||{}).value?.trim();
+  const prodLoc   = (qs("#c-prod-loc")  ||{}).value?.trim();
+  const prodSerial= (qs("#c-prod-serial")||{}).value?.trim();
+
+  const payload = {
+    serviceDate: date, brand, category: CF2.category, orionDescription: orion,
+    orionCode: CF2.orionCode, subCategory: CF2.subCategory, remarks: rem,
+    technician: { id: techId||undefined, name: tech }
+  };
+  if (custDop||custName||custAddr||custPhone)
+    payload.customer = { dateOfPurchase: custDop||undefined, name: custName||undefined, address: custAddr||undefined, phone: custPhone||undefined };
+  if (dlrDop||dlrName||dlrAddr||dlrPhone)
+    payload.dealer = { dateOfPurchase: dlrDop||undefined, name: dlrName||undefined, address: dlrAddr||undefined, phone: dlrPhone||undefined };
+  if (prodLoc||prodSerial)
+    payload.productInfo = { location: prodLoc||undefined, serialNo: prodSerial||undefined };
+
   const btn = qs("#cr-btn"); btn.disabled=true; btn.innerHTML=`<span class="spin"></span> Creating...`;
   try {
-    await call("POST", "/services", { serviceDate:date, brand, category:CF2.category, orionDescription:orion, orionCode:CF2.orionCode, subCategory:CF2.subCategory, remarks:rem, technician:{ id:techId||undefined, name:tech } });
+    await call("POST", "/services", payload);
     qs("#cr-alert").innerHTML = alert_html("✅ Service record created successfully!","success");
     CF2 = { brand:"",category:"",orionDescription:"",orionCode:"",subCategory:"",techId:"",techName:"" };
     setTimeout(() => go("services"), 1200);
