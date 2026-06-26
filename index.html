@@ -1476,21 +1476,15 @@ function productsHTML() {
   </div>
 
   <!-- Product Table -->
-  <div style="background:#fff;border-radius:12px;border:1px solid var(--gray-200);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04)">
-    <div id="products-tbl" style="padding:24px"><div class="ld"><span class="spin"></span> Loading...</div></div>
+  <div class="card" style="padding:0">
+    <div id="products-tbl" style="padding:20px"><div class="ld"><span class="spin"></span> Loading...</div></div>
     <div id="pm-pager" style="padding:0 20px 16px"></div>
   </div>
 
   <!-- Import History -->
-  ${isHO ? `<div style="background:#fff;border-radius:12px;border:1px solid var(--gray-200);margin-top:24px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.04)">
-    <div style="padding:18px 20px;border-bottom:1px solid var(--gray-100);display:flex;align-items:center;justify-content:space-between">
-      <div>
-        <div style="font-size:15px;font-weight:700;color:var(--gray-800)">Import History</div>
-        <div style="font-size:12px;color:var(--gray-500);margin-top:2px">All previous Product Master uploads</div>
-      </div>
-      <svg width="18" height="18" fill="none" stroke="var(--gray-400)" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
-    </div>
-    <div id="pm-history" style="padding:4px 0"><div class="ld"><span class="spin"></span> Loading history...</div></div>
+  ${isHO ? `<div class="card" style="margin-top:20px">
+    <div class="card-hdr"><div class="card-title">Import History</div></div>
+    <div id="pm-history"><div class="ld"><span class="spin"></span> Loading history...</div></div>
   </div>` : ""}
 
   <div id="products-modal"></div>
@@ -1603,37 +1597,25 @@ function renderProductsTable(prods, total, isAdmin) {
   const el = qs("#products-tbl");
   if (!el) return;
   if (!prods.length) {
-    el.innerHTML = `<div style="text-align:center;padding:56px 24px">
-      <svg width="40" height="40" fill="none" stroke="var(--gray-300)" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 12px"><path d="M20 7H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-      <p style="font-size:14px;font-weight:600;color:var(--gray-500);margin:0 0 4px">No products found</p>
-      <p style="font-size:13px;color:var(--gray-400);margin:0">Upload a Product Master Excel file to populate the catalogue.</p>
-    </div>`;
+    el.innerHTML = `<div class="empty"><p>No products found.</p><p class="sm muted mt1">Upload a Product Master Excel file to populate the catalogue.</p></div>`;
     return;
   }
-  el.innerHTML = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
-    <thead><tr style="background:var(--gray-50)">
-      <th style="padding:11px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--gray-200);white-space:nowrap">Brand</th>
-      <th style="padding:11px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--gray-200);white-space:nowrap">Category</th>
-      <th style="padding:11px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--gray-200);white-space:nowrap">Orion Code</th>
-      <th style="padding:11px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--gray-200)">Orion Description</th>
-      <th style="padding:11px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--gray-200);white-space:nowrap">Sub-Category</th>
-      ${isAdmin ? `<th style="padding:11px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid var(--gray-200)"></th>` : ""}
+  el.innerHTML = `<div class="tbl-wrap"><table>
+    <thead><tr>
+      <th>Brand</th><th>Category</th><th>Orion Code</th><th>Orion Description</th><th>Sub-Category</th>
+      ${isAdmin ? "<th>Actions</th>" : ""}
     </tr></thead>
-    <tbody>${prods.map(p => `<tr style="transition:background .1s" onmouseover="this.style.background='var(--gray-50)'" onmouseout="this.style.background=''">
-      <td style="padding:12px 16px;font-size:13px;font-weight:700;color:var(--gray-800);border-bottom:1px solid var(--gray-100)">
-        <span style="display:inline-block;background:var(--blue-bg);color:var(--blue);padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700">${p.brand||"—"}</span>
-      </td>
-      <td style="padding:12px 16px;font-size:13px;color:var(--gray-700);border-bottom:1px solid var(--gray-100)">${CAT_NAMES[p.category]||p.category||"—"}</td>
-      <td style="padding:12px 16px;font-size:12px;color:var(--gray-500);font-family:monospace;border-bottom:1px solid var(--gray-100)">${p.orionCode||"—"}</td>
-      <td style="padding:12px 16px;font-size:13px;color:var(--gray-800);border-bottom:1px solid var(--gray-100)">${p.orionDescription||"—"}</td>
-      <td style="padding:12px 16px;border-bottom:1px solid var(--gray-100)">
-        <span style="display:inline-block;background:var(--gray-100);color:var(--gray-600);padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600">${p.subCategory||"—"}</span>
-      </td>
-      ${isAdmin ? `<td style="padding:12px 16px;border-bottom:1px solid var(--gray-100)"><button class="btn btn-danger btn-sm" data-del="${p._id}" style="padding:5px 12px;font-size:12px">Delete</button></td>` : ""}
+    <tbody>${prods.map(p => `<tr>
+      <td class="bold">${p.brand||"—"}</td>
+      <td>${CAT_NAMES[p.category]||p.category||"—"}</td>
+      <td style="font-size:12px;color:var(--gray-500)">${p.orionCode||"—"}</td>
+      <td>${p.orionDescription||"—"}</td>
+      <td>${p.subCategory||"—"}</td>
+      ${isAdmin ? `<td><button class="btn btn-danger btn-sm" data-del="${p._id}">Delete</button></td>` : ""}
     </tr>`).join("")}
     </tbody>
   </table></div>
-  <div style="padding:12px 16px 4px;font-size:12px;color:var(--gray-400)">Showing ${prods.length} of ${total} products</div>`;
+  <div class="sm muted" style="padding:8px 0">Showing ${prods.length} of ${total} products</div>`;
 
   if (isAdmin) {
     qsa("[data-del]", el).forEach(b => on(b, "click", () => deleteProduct(b.dataset.del)));
