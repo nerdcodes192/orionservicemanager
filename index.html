@@ -878,11 +878,20 @@ function openView(id) {
         const hasP=p.location||p.serialNo;
         if(!hasC&&!hasD&&!hasP) return "";
         const lbl=(t,v)=>`<div><div style="font-size:11px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">${t}</div><div style="font-size:13px;font-weight:600">${v}</div></div>`;
-        let html=`<div class="divider"></div><div style="font-size:13px;font-weight:700;margin-bottom:12px">Additional Information</div>`;
-        if(hasC){html+=`<div style="font-size:12px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Customer Information</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">${lbl("Date of Purchase",fmtD(c.dateOfPurchase))}${lbl("Customer Name",fv(c.name))}${lbl("Address",fv(c.address))}${lbl("Phone No.",fv(c.phone))}</div>`;}
-        if(hasD){html+=`<div style="font-size:12px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Dealer Information</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">${lbl("Date of Purchase",fmtD(d.dateOfPurchase))}${lbl("Dealer Name",fv(d.name))}${lbl("Address",fv(d.address))}${lbl("Phone No.",fv(d.phone))}</div>`;}
-        if(hasP){html+=`<div style="font-size:12px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Product Information</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">${lbl("Location",fv(p.location))}${lbl("Serial No.",fv(p.serialNo))}</div>`;}
-        return html;
+        let inner="";
+        if(hasC){inner+=`<div style="font-size:12px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Customer Information</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">${lbl("Date of Purchase",fmtD(c.dateOfPurchase))}${lbl("Customer Name",fv(c.name))}${lbl("Address",fv(c.address))}${lbl("Phone No.",fv(c.phone))}</div>`;}
+        if(hasD){inner+=`${hasC?'<div class="divider"></div>':"" }<div style="font-size:12px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Dealer Information</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">${lbl("Date of Purchase",fmtD(d.dateOfPurchase))}${lbl("Dealer Name",fv(d.name))}${lbl("Address",fv(d.address))}${lbl("Phone No.",fv(d.phone))}</div>`;}
+        if(hasP){inner+=`${(hasC||hasD)?'<div class="divider"></div>':"" }<div style="font-size:12px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Product Information</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">${lbl("Location",fv(p.location))}${lbl("Serial No.",fv(p.serialNo))}</div>`;}
+        return `<div class="divider"></div>
+          <div style="border:1px solid var(--gray-200);border-radius:10px;overflow:hidden;margin-bottom:4px">
+            <button onclick="(function(){var b=document.getElementById('vai-toggle'),p=document.getElementById('vai-body'),ic=document.getElementById('vai-chevron'),open=b.getAttribute('data-open')=='1';if(open){p.style.maxHeight='0';p.style.opacity='0';ic.style.transform='rotate(0deg)';b.setAttribute('data-open','0');}else{p.style.maxHeight='900px';p.style.opacity='1';ic.style.transform='rotate(180deg)';b.setAttribute('data-open','1');}})();" id="vai-toggle" data-open="0" style="width:100%;background:none;border:none;cursor:pointer;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;text-align:left">
+              <span style="font-size:13px;font-weight:700;color:var(--gray-800)">Additional Information</span>
+              <svg id="vai-chevron" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--gray-400)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform .25s ease"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </button>
+            <div id="vai-body" style="max-height:0;opacity:0;overflow:hidden;transition:max-height .3s ease,opacity .25s ease">
+              <div style="padding:0 14px 14px">${inner}</div>
+            </div>
+          </div>`;
       })()}
       ${techHist.length?`<div class="divider"></div><div style="font-size:13px;font-weight:700;margin-bottom:10px">Technician Assignment History</div>${techHist.map(h=>`<div class="hist-item"><div class="hist-dot"></div><div><div class="hist-title">${h.previousTechnicianName||"(none)"} → ${h.newTechnicianName}</div><div class="hist-meta">${h.changedByName||"—"} · ${new Date(h.changedAt).toLocaleString()}</div></div></div>`).join("")}`:""}
     </div>`);
