@@ -868,7 +868,6 @@ function openView(id) {
         ${rows.map(([l,v])=>`<div><div style="font-size:11px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">${l}</div><div style="font-size:13px;font-weight:600">${v}</div></div>`).join("")}
       </div>
       ${r.remarks?`<div class="fg"><label>Remarks</label><div style="background:var(--gray-50);padding:10px;border-radius:8px;font-size:13px">${r.remarks}</div></div>`:""}
-      ${(r.statusHistory||[]).length?`<div class="divider"></div><div style="font-size:13px;font-weight:700;margin-bottom:10px">Status History</div>${r.statusHistory.map(h=>`<div class="hist-item"><div class="hist-dot"></div><div><div class="hist-title">${h.previousStatus||"Created"} → ${h.newStatus}</div><div class="hist-meta">${h.changedByName||"—"} · ${new Date(h.changedAt).toLocaleString()}</div>${h.remarks?`<div class="sm muted">${h.remarks}</div>`:""}</div></div>`).join("")}`:""}
       ${(()=>{
         const c=r.customer||{}, d=r.dealer||{}, p=r.productInfo||{};
         const fmtD=v=>v?new Date(v).toLocaleDateString():"—";
@@ -893,6 +892,7 @@ function openView(id) {
             </div>
           </div>`;
       })()}
+      ${(r.statusHistory||[]).length?`<div class="divider"></div><div style="font-size:13px;font-weight:700;margin-bottom:10px">Status History</div>${r.statusHistory.map(h=>`<div class="hist-item"><div class="hist-dot"></div><div><div class="hist-title">${h.previousStatus||"Created"} → ${h.newStatus}</div><div class="hist-meta">${h.changedByName||"—"} · ${new Date(h.changedAt).toLocaleString()}</div>${h.remarks?`<div class="sm muted">${h.remarks}</div>`:""}</div></div>`).join("")}`:""}
       ${techHist.length?`<div class="divider"></div><div style="font-size:13px;font-weight:700;margin-bottom:10px">Technician Assignment History</div>${techHist.map(h=>`<div class="hist-item"><div class="hist-dot"></div><div><div class="hist-title">${h.previousTechnicianName||"(none)"} → ${h.newTechnicianName}</div><div class="hist-meta">${h.changedByName||"—"} · ${new Date(h.changedAt).toLocaleString()}</div></div></div>`).join("")}`:""}
     </div>`);
 }
