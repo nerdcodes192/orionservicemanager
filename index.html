@@ -1492,18 +1492,18 @@ function productsHTML() {
   <style>
     #pm-page-hdr { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:28px; flex-wrap:wrap; }
     #pm-stats    { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
-    #pm-filters  { display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
-    #pm-filters .pm-search-wrap { display:flex;align-items:center;background:#fff;border:1.5px solid var(--gray-200);border-radius:8px;padding:0 12px;gap:8px;flex:1;min-width:180px;max-width:320px;height:38px;box-sizing:border-box; }
-    #pm-filters .pm-search-wrap input { border:none;background:none;outline:none;font-size:13px;width:100%;color:var(--gray-800); }
-    #pm-filters select { height:38px;padding:0 10px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;background:#fff;color:var(--gray-700);cursor:pointer;min-width:130px;box-sizing:border-box; }
+    #pm-filters  { display:flex; align-items:center; gap:8px; margin-bottom:16px; flex-wrap:nowrap; width:100%; }
+    #pm-filters .pm-search-wrap { display:flex;align-items:center;background:#fff;border:1.5px solid var(--gray-200);border-radius:8px;padding:0 12px;gap:8px;flex:1 1 auto;min-width:160px;max-width:280px;height:36px;box-sizing:border-box; }
+    #pm-filters .pm-search-wrap input { border:none;background:none;outline:none;font-size:13px;width:100%;line-height:36px;height:100%;color:var(--gray-800); }
+    #pm-filters select { height:36px;padding:0 8px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;background:#fff;color:var(--gray-700);cursor:pointer;min-width:0;max-width:160px;box-sizing:border-box;flex:1 1 auto; }
     @media(max-width:1024px){ #pm-stats{grid-template-columns:repeat(2,1fr)!important} }
     @media(max-width:640px){
       #pm-stats{grid-template-columns:1fr 1fr!important}
       #pm-import-btn{width:100%!important;justify-content:center!important;margin-top:8px}
       #pm-page-hdr{flex-direction:column!important}
-      #pm-filters{flex-direction:column!important;align-items:stretch!important}
-      #pm-filters .pm-search-wrap{max-width:100%!important;min-width:0!important}
-      #pm-filters select{min-width:0!important;width:100%!important}
+      #pm-filters{flex-wrap:wrap!important}
+      #pm-filters .pm-search-wrap{flex:0 0 100%!important;max-width:100%!important}
+      #pm-filters select{flex:1 1 calc(50% - 4px)!important;max-width:none!important}
     }
     @media(max-width:400px){ #pm-stats{grid-template-columns:1fr!important} }
   </style>`;
