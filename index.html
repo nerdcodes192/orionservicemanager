@@ -60,14 +60,14 @@ input:disabled,input[readonly]{background:var(--gray-100)}
 .ac-item{padding:8px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--gray-100)}
 .ac-item:hover{background:var(--blue-bg);color:var(--blue)}
 .ac-item small{display:block;font-size:11px;color:var(--gray-400)}
-.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn{padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .btn-primary{background:var(--blue);color:#fff}
 .btn-primary:hover{background:var(--blue-hover)}
 .btn-secondary{background:#fff;color:var(--gray-700);border:1.5px solid var(--gray-200)}
 .btn-secondary:hover{background:var(--gray-50)}
 .btn-success{background:var(--green);color:#fff}
 .btn-danger{background:var(--red);color:#fff}
-.btn-sm{padding:0 14px;font-size:13px;height:36px;box-sizing:border-box}
+.btn-sm{padding:0 14px;font-size:13px;height:36px;box-sizing:border-box;flex-shrink:0}
 .btn-full{width:100%;justify-content:center;padding:11px}
 .btn:disabled{opacity:.6;cursor:not-allowed}
 .card{background:#fff;border-radius:10px;border:1px solid var(--gray-200);padding:20px}
@@ -103,10 +103,12 @@ tr:hover td{background:var(--gray-50)}
 .modal-foot{padding:16px 24px;border-top:1px solid var(--gray-200);display:flex;gap:10px;justify-content:flex-end}
 .modal-close{background:none;border:none;cursor:pointer;color:var(--gray-400);padding:4px;line-height:1}
 .modal-close:hover{color:var(--gray-700)}
-.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:nowrap;width:100%;overflow:visible}
+.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap;width:100%;overflow:visible}
 .srch{display:flex;align-items:center;background:#fff;border:1.5px solid var(--gray-200);border-radius:8px;padding:0 12px;gap:8px;flex:1 1 auto;min-width:160px;max-width:280px;height:36px;box-sizing:border-box}
 .srch input{border:none;background:none;outline:none;font-size:13px;width:100%;line-height:36px;height:100%}
 .fsel{height:36px;padding:0 8px;border:1.5px solid var(--gray-200);border-radius:8px;font-size:13px;background:#fff;cursor:pointer;appearance:auto;-webkit-appearance:auto;color:var(--gray-700);min-width:0;max-width:160px;box-sizing:border-box}
+.fsel-date{max-width:150px;flex-shrink:0}
+.toolbar-date-lbl{font-size:12px;color:var(--gray-500);font-weight:600;white-space:nowrap;flex-shrink:0}
 .pager{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
 .pager-info{font-size:12px;color:var(--gray-500)}
 .pager-btns{display:flex;gap:4px}
@@ -191,6 +193,8 @@ tr:hover td{background:var(--gray-50)}
   .toolbar{flex-wrap:wrap;gap:6px;margin-bottom:12px}
   .srch{order:-1;flex:0 0 100%;max-width:100%;min-width:0}
   .fsel{flex:1 1 calc(50% - 3px);max-width:none;font-size:12px;padding:6px 6px}
+  .fsel-date{flex:1 1 calc(50% - 3px);max-width:none;font-size:12px;padding:6px 6px}
+  .toolbar-date-lbl{flex:0 0 100%;margin:2px 0 -2px}
   .btn-sm{font-size:12px;padding:6px 10px;white-space:nowrap;flex-shrink:0}
 
   /* Tables */
@@ -235,6 +239,7 @@ tr:hover td{background:var(--gray-50)}
   .stat-val{font-size:17px}
   .stat{padding:10px 8px;gap:8px}
   .fsel{flex:1 1 100%;max-width:100%}
+  .fsel-date{flex:1 1 100%;max-width:100%}
   .chip.grey{display:none}
 }  .stat-val{font-size:18px}
   .fsel{flex:1 1 100%}
@@ -751,22 +756,16 @@ function bindPage() {
 
 // ── Dashboard ────────────────────────────────────────────
 let DASH_BRANCH = "";
-let DASH_FROM = "";
-let DASH_TO = "";
 function dashHTML() {
   const isHO = ["Head Office Team","System Administrator"].includes(S.user.userType);
   return `<div class="sec-title">Welcome back, ${S.user.fullName.split(" ")[0]}! 👋</div>
   <div class="sec-sub">Here's your service overview for today.</div>
-  <div class="toolbar" style="margin-bottom:12px">
-    ${isHO ? `<select class="fsel" id="dash-branch" style="max-width:220px">
+  ${isHO ? `<div class="toolbar" style="margin-bottom:12px">
+    <select class="fsel" id="dash-branch" style="max-width:220px">
       <option value="">Branches</option>
       ${BRANCH_CACHE.list.map(b=>`<option${DASH_BRANCH===b?" selected":""}>${b}</option>`).join("")}
-    </select>` : ""}
-    <label style="font-size:12px;color:var(--gray-500);font-weight:600;white-space:nowrap">From</label>
-    <input type="date" class="fsel" id="dash-from" style="max-width:150px" value="${DASH_FROM}" max="${DASH_TO||""}">
-    <label style="font-size:12px;color:var(--gray-500);font-weight:600;white-space:nowrap">To</label>
-    <input type="date" class="fsel" id="dash-to" style="max-width:150px" value="${DASH_TO}" min="${DASH_FROM||""}">
-  </div>
+    </select>
+  </div>` : ""}
   <div class="stats" style="margin-bottom:20px">
     <div class="stat"><div class="stat-ico" style="background:#dbeafe;flex-shrink:0"><svg width="20" height="20" fill="none" stroke="#1E4E8C" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div style="min-width:0"><div class="stat-val" style="color:#1E4E8C" id="sv-total">—</div><div class="stat-lbl">Total</div></div></div>
     <div class="stat"><div class="stat-ico" style="background:#dbeafe;flex-shrink:0"><svg width="20" height="20" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div style="min-width:0"><div class="stat-val" style="color:#2563EB" id="sv-opened">—</div><div class="stat-lbl">Opened</div></div></div>
@@ -790,26 +789,12 @@ async function bindDash() {
       on(sel, "change", e => { DASH_BRANCH = e.target.value; loadDashStats(); });
     }
   }
-  // From/To date range is available to every role — branch is HO/Admin-only,
-  // but coordinators/technicians/branch users can still narrow their own
-  // (already branch-locked) view to a date window.
-  on(qs("#dash-from"), "change", e => {
-    DASH_FROM = e.target.value;
-    const toEl = qs("#dash-to"); if (toEl) toEl.min = DASH_FROM || "";
-    loadDashStats();
-  });
-  on(qs("#dash-to"), "change", e => {
-    DASH_TO = e.target.value;
-    const fromEl = qs("#dash-from"); if (fromEl) fromEl.max = DASH_TO || "";
-    loadDashStats();
-  });
   await loadDashStats();
 }
 async function loadDashStats() {
   try {
-    // Field roles are always locked to their own branch; HO/Admin can pick
-    // a branch from the dropdown. Everyone — every role — can narrow by the
-    // From–To date range (all empty = combined stats across all time).
+    // Field roles only ever see their own branch; HO/Admin can pick one from
+    // the dropdown above the cards (empty = combined stats across branches).
     const isCoord = ["Service Coordinator","Service Technician","Branch User"].includes(S.user.userType);
     const isHO = ["Head Office Team","System Administrator"].includes(S.user.userType);
 
@@ -819,8 +804,6 @@ async function loadDashStats() {
     } else if (isHO && DASH_BRANCH) {
       statsP.set("branch", DASH_BRANCH);
     }
-    if (DASH_FROM) statsP.set("startDate", DASH_FROM);
-    if (DASH_TO)   statsP.set("endDate", DASH_TO);
     const statsQ = statsP.toString() ? "?" + statsP.toString() : "";
     const d = await call("GET", "/services/stats/dashboard" + statsQ);
     qs("#sv-total").textContent = d.total;
@@ -828,15 +811,13 @@ async function loadDashStats() {
     qs("#sv-pending").textContent = d.pending;
     qs("#sv-closed").textContent = d.closed;
 
-    // Recent records — same branch/date filtering as the cards above
+    // Recent records — same branch filtering as the cards above
     const recP = new URLSearchParams({ limit: 10, page: 1 });
     if (isCoord && S.user.branch) {
       recP.set("branch", S.user.branch);
     } else if (isHO && DASH_BRANCH) {
       recP.set("branch", DASH_BRANCH);
     }
-    if (DASH_FROM) recP.set("startDate", DASH_FROM);
-    if (DASH_TO)   recP.set("endDate", DASH_TO);
     const rd = await call("GET", "/services?" + recP.toString());
     const recs = rd.records || [];
     if (!recs.length) { qs("#recent-tbl").innerHTML = `<div class="empty">No service records yet.</div>`; return; }
@@ -858,10 +839,10 @@ function svcListHTML() {
     <div class="srch">${ICONS.search}<input id="sf-search" placeholder="Search records..." value="${SF.search}"></div>
     <select class="fsel" id="sf-status"><option value="">Status</option><option${SF.status==="Opened"?" selected":""}>Opened</option><option${SF.status==="Pending"?" selected":""}>Pending</option><option${SF.status==="Closed"?" selected":""}>Closed</option></select>
     ${isHO ? `<select class="fsel" id="sf-branch"><option value="">Branches</option>${BRANCH_CACHE.list.map(b=>`<option${SF.branch===b?" selected":""}>${b}</option>`).join("")}</select>` : ""}
-    <label style="font-size:12px;color:var(--gray-500);font-weight:600;white-space:nowrap">From</label>
-    <input type="date" class="fsel" id="sf-from" style="max-width:150px" value="${SF.startDate}" max="${SF.endDate||""}">
-    <label style="font-size:12px;color:var(--gray-500);font-weight:600;white-space:nowrap">To</label>
-    <input type="date" class="fsel" id="sf-to" style="max-width:150px" value="${SF.endDate}" min="${SF.startDate||""}">
+    <label class="toolbar-date-lbl">From</label>
+    <input type="date" class="fsel fsel-date" id="sf-from" value="${SF.startDate}" max="${SF.endDate||""}">
+    <label class="toolbar-date-lbl">To</label>
+    <input type="date" class="fsel fsel-date" id="sf-to" value="${SF.endDate}" min="${SF.startDate||""}">
     <select class="fsel" id="sf-brand"><option value="">Brands</option>${brands.map(b=>`<option${SF.brand===b?" selected":""}>${b}</option>`).join("")}</select>
     <select class="fsel" id="sf-cat"><option value="">Categories</option>${cats.map(c=>`<option value="${c}"${SF.category===c?" selected":""}>${CAT_NAMES[c]||c}</option>`).join("")}</select>
     <button class="btn btn-secondary btn-sm" id="export-btn">⬇ Export Excel</button>
